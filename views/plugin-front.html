@@ -256,7 +256,8 @@
                 utc = '', utc_r,
                 lastUsers = [],
                 webRTCClient = null,
-                incomingCallId =0;
+                incomingCallId =0,
+                callerId =0;
             
             function startIM(destId){
                 $('#text-input').keyup( function(e){
@@ -270,7 +271,7 @@
              function sendIMMessage(destId, message){
                  if(message.trim() !=''){
                      imClient.sendMessage(destId, message);
-                     if( message!='null'){
+                     if( message!='null' && message != '$Ack_Accept'){
                          $('#chat-messages').append('<li class="bubbledLeft">'+message+'</li>');
                          $('#chat-messages').append('<li class="textLeft" style="float : right; font-size : 10px; list-style : none;">'+
                                                 getHeure(new Date())+'</li>');
@@ -284,6 +285,9 @@
                       $('#chat-plus').css({'display': 'block'});
                      $('#foot').css({'display' : 'none'});
                  }
+                if( e.detail.message == '$Ack_Accept'){
+                              ion.sound.stop('skype');
+                } else{
                      startIM(e.detail.senderId);
                      $('#chat-messages').append('<li class="bubbledRight" >'+e.detail.message+'</li>'+                                    
                                             '<span class="textRight" style="float : left; font-size : 10px; list-style : none;">'+
@@ -292,6 +296,8 @@
                  $('#chat-icon').css({'display': 'block'});
                      $('#chat-messages').animate({scrollTop: $('#chat-messages')[0].scrollHeight},2000); 
              }
+             }
+             
              function getHeure(date){
                  var heures = ("0" +date.getHours()).slice('-2');
                  var minutes = ("0" +date.getMinutes()).slice('-2');
@@ -395,6 +401,7 @@
                 addHangupButton(e.detail.callId);
         //Accept-Refuse
                 incomingCallId = e.detail.callId;
+                 callerId = e.detail.callerId;
             }
              function userMediaSuccessHandler(e) {
                 console.log("userMediaSuccessHandler e.detail.callId :" + e.detail.callId);
@@ -446,10 +453,10 @@
                      $('#video-call').click(function(){
                          $("#hangup").attr("disabled", false).val("Raccrocher");
                          $("#video-call").unbind('click');
-                         var callId = webRTCClient.call(el.innerHTML);
+                          var  callId = webRTCClient.call(el.innerHTML);
                              if (callId != null) {
                                  addHangupButton(callId);
-                             } 
+                             }
                          $('#menu').show('explode');
                          ion.sound.play("skype");
                          $('#hangup').attr('disabled', false);
@@ -475,6 +482,7 @@
                     webRTCClient.acceptCall(incomingCallId);
                     ion.sound.stop("iphone");
                     ion.sound.stop("skype");
+                    sendIMMessage(callerId, '$Ack_Accept');
                 });
 
                  $("#refuse").click(function () {
@@ -486,6 +494,7 @@
                     removeHangupButton(incomingCallId);
                      ion.sound.stop("iphone"); 
                      $('#menu').css({'display' : 'none'});
+                     sendIMMessage(callerId, '$Ack_Accept');
                 });
              }
              apiRTC.init({
@@ -501,7 +510,8 @@
                            {name: "bell_ring"},
                            {name : "facebook"},
                            {name : "iphone", loop:4},
-                           {name : 'hangup'}
+                           {name : 'hangup'},
+                           {name : "skype", loop:10}
                        ],
                        path: "../sounds/",
                        preload: true,
