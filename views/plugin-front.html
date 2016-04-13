@@ -188,7 +188,10 @@
                 </div>
                 <div id="remote" style="width:100%;"></div>
                 <div id="mini"></div>
-                       
+                <div id="audio" style="display: none; height:90px;" class="col-xs-4 bg-info fa-border">
+                           <div id="timer"></div>
+                           <i class="fa fa-spinner fa-pulse fa-3x fa-fw margin-bottom" style="margin-left : 80px;" id="call-going"></i>
+                </div>    
                </div>
             <div class="col-md-3" style="vertical-align: top;">
                 <div class="row" id="chat-space" style="">
@@ -245,6 +248,7 @@
         <script src="../js/bootstrap.min.js"></script>
         <script src="../js/script.js"></script>
   <script src="../js/iframeResizer.contentWindow.min.js"></script>
+ <script src="../js/timer.jquery.js"></script>
          <script type="text/javascript">
              
            'use strict';
@@ -257,7 +261,8 @@
                 lastUsers = [],
                 webRTCClient = null,
                 incomingCallId =0,
-                callerId =0;
+                callerId =0,
+                callType = '';
             
             function startIM(destId){
                 $('#text-input').keyup( function(e){
@@ -286,7 +291,11 @@
                      $('#foot').css({'display' : 'none'});
                  }
                 if( e.detail.message == '$Ack_Accept'){
-                              ion.sound.stop('skype');
+                        ion.sound.stop('skype');
+                        ion.sound.stop('skype');
+                        $('#call-going').css({'display' : 'none'});
+                        $('#timer').timer();
+                          
                 } else{
                      startIM(e.detail.senderId);
                      $('#chat-messages').append('<li class="bubbledRight" >'+e.detail.message+'</li>'+                                    
@@ -359,6 +368,7 @@
             */
                 webRTCClient.removeElementFromDiv('mini', 'miniElt-' + callId);
                 webRTCClient.removeElementFromDiv('remote', 'remoteElt-' + callId);
+                //webRTCClient.removeElementFromDiv('audio', 'audioElt-' + callId);
             }
             function addHangupButton(callId) {
                 var hangupButtons = document.getElementById("hangupButtons"),
@@ -386,6 +396,7 @@
                 initMediaElementState(e.detail.callId);
                 removeHangupButton(e.detail.callId);
                 $('#menu').css({'display' : 'none'});
+                 $('#audio').css({'display': 'none'});
                 ion.sound.stop("iphone");
                 ion.sound.play("hangup");
             }
@@ -395,13 +406,18 @@
                 $("#accept").attr("disabled", false).val("Accepter");
                 $("#refuse").attr("disabled", false).val("Refuser");
                  //$('#remote').addClass('fa-boder');
-                    if(e.detail.callType === 'media'){
-                    ion.sound.play("iphone");
-                }
-                addHangupButton(e.detail.callId);
-        //Accept-Refuse
+                  addHangupButton(e.detail.callId);
+                 //Accept-Refuse
                 incomingCallId = e.detail.callId;
                  callerId = e.detail.callerId;
+                 if(e.detail.callType == 'audio'){
+                     callType = e.detail.callType;
+                     $('#audio').css({'display': 'block'});
+                     $('#hangup-audio').css({'display': 'none'});
+                      // webRTCClient.addStreamInDiv(e.detail.stream, e.detail.callType, "audio", 'audioElt-' + e.detail.callId,
+                               //{width : "640px", height : "480px"}, true);
+                 }
+                   ion.sound.play("iphone");
             }
              function userMediaSuccessHandler(e) {
                 console.log("userMediaSuccessHandler e.detail.callId :" + e.detail.callId);
@@ -461,6 +477,17 @@
                          ion.sound.play("skype");
                          $('#hangup').attr('disabled', false);
                      });
+                      $('#audio-call').click(function(){
+                              $('#audio-call').unbind('click');
+                              var callId = webRTCClient.callAudio(id);
+                              if (callId != null) {
+                                 addHangupButton(callId);
+                             }
+                              $('#menu').show('explode'); 
+                              $('#hangup').attr('disabled', false);
+                              $('#audio').css({'display' : 'block'});
+                              ion.sound.play('skype');
+                         });
                  });
                //Multi calls Activation
                 webRTCClient.setAllowMultipleCalls(true);
@@ -473,9 +500,11 @@
                     webRTCClient.hangUp();
                     ion.sound.stop("iphone"); 
                     $('#menu').css({'display' : 'none'});
+                     $('#audio').css({'display': 'none'});
                     ion.sound.stop("skype");
                 });
                 $("#accept").click(function () {
+                    alert(callType);
                     $("#accept").attr("disabled", true).val("Accepter");
                     $("#refuse").attr("disabled", true).val("Refuser");
                     $("#hangup").attr("disabled", false).val("Raccrocher");
@@ -483,6 +512,11 @@
                     ion.sound.stop("iphone");
                     ion.sound.stop("skype");
                     sendIMMessage(callerId, '$Ack_Accept');
+                     if( callType == 'audio'){
+                        $('audio').attr('muted', false);
+                        $('#timer').timer();
+                        $('#call-going').css({'display': 'none'});
+                    }
                 });
 
                  $("#refuse").click(function () {
@@ -494,6 +528,7 @@
                     removeHangupButton(incomingCallId);
                      ion.sound.stop("iphone"); 
                      $('#menu').css({'display' : 'none'});
+                     $('#audio').css({'display': 'none'});
                      sendIMMessage(callerId, '$Ack_Accept');
                 });
              }
