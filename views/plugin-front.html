@@ -512,7 +512,9 @@
                               ion.sound.play('skype');
                          });
                       $("#screenSharing").click(function () {
-                          $('#screenSharing').attr('disabled', true);
+                          $('#screenSharing').attr('disabled', true).val('Arrêter le partage');
+                          $('#accept').css({'display' : 'none'});
+                          $('#refuse').css({'display' : 'none'});
                           $('#menu').show('explode');
                           $("#hangup").attr("disabled", false);
                           var callId = webRTCClient.shareScreen(el.innerHTML);
