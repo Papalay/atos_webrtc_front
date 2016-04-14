@@ -75,8 +75,8 @@ $(document).ready(function(){
     $('#chat-plus').css({'display': 'none'});
     $('#foot').css({'display': 'block'});
     $('#foot-back').css({'display': 'none'});
-    //$('#chat-minus' ).draggable({ containment: 'document' });
-   // $('#chat-plus' ).draggable({ containment: 'document' });
+    $('#foot' ).draggable({ containment: 'document' });
+   $('#chat-plus' ).draggable({ containment: 'document' });
 
      //$('#conversation-audio').css({'display': 'none'});
      //document.getElementById('conversation-video').style.display = 'none';
