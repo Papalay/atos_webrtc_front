@@ -186,6 +186,9 @@
                     <input id="accept" class="btn btn-success" type="button" disabled="true" value="Accepter" />
                     <input id="refuse" class="btn btn-warning" type="button" disabled="true" value="Refuser" />
                 </div>
+                <div id="menuScreenSharing" style="display : none;">
+                  <input  id="hangupScreenSharing" class="btn btn-danger" value="Arrêter le partage" />
+                </div>
                 <div id="remote" style="width:100%;"></div>
                 <div id="mini"></div>
                 <div id="audio" style="display: none; height:90px;" class="col-xs-4 bg-info fa-border">
@@ -404,23 +407,24 @@
                 initMediaElementState(e.detail.callId);
                 removeHangupButton(e.detail.callId);
                 $('#menu').css({'display' : 'none'});
-                 $('#audio').css({'display': 'none'});
+                $('#audio').css({'display': 'none'});
+                $('#menuScreenSharing').css({'display' : 'none'});
                 ion.sound.stop("iphone");
                 ion.sound.play("hangup");
                 $('#video-call').attr('disabled', false);
                 $('#audio-call').attr('disabled', false);
             }
              function incomingCallHandler(e) {
-                $("#hangup").attr("disabled", true).val("Raccrocher");
-                $('#menu').show('explode');
-                $("#accept").attr("disabled", false).val("Accepter");
-                $("#refuse").attr("disabled", false).val("Refuser");
-                 //$('#remote').addClass('fa-boder');
+
                   addHangupButton(e.detail.callId);
                  //Accept-Refuse
                 incomingCallId = e.detail.callId;
                  callerId = e.detail.callerId;
                  if(e.detail.callType == 'media'){
+                    $("#hangup").attr("disabled", true).val("Raccrocher");
+                    $('#menu').show('explode');
+                    $("#accept").attr("disabled", false).val("Accepter");
+                    $("#refuse").attr("disabled", false).val("Refuser");
                        ion.sound.play("iphone");
                  }
                  if(e.detail.callType == 'audio'){
@@ -430,10 +434,7 @@
                  }
                  
                   if(e.detail.callType == 'screenSharing'){
-                     $("#hangup").attr('disabled', false).val('Arrêter le partage');
-                     $('#accept').css({'display' : 'none'});
-                     $('#refuse').css({'display' : 'none'});
-                     $('#menu').show('explode');
+                     $('#menuScreenSharing').show('explode');
                  }
             }
              function userMediaSuccessHandler(e) {
@@ -512,11 +513,7 @@
                               ion.sound.play('skype');
                          });
                       $("#screenSharing").click(function () {
-                          $('#screenSharing').attr('disabled', true).val('Arrêter le partage');
-                          $('#accept').css({'display' : 'none'});
-                          $('#refuse').css({'display' : 'none'});
-                          $('#menu').show('explode');
-                          $("#hangup").attr("disabled", false);
+                          $('#menuScreenSharing').show('explode');
                           var callId = webRTCClient.shareScreen(el.innerHTML);
                           if (callId != null) {
                               addHangupButton(callId);
@@ -538,6 +535,12 @@
                     $('#menu').css({'display' : 'none'});
                     $('#timer').timer('remove');
                      $('#audio').css({'display': 'none'});
+                    ion.sound.stop("skype");
+                });
+                  $("#hangupScreenSharing").click(function () {
+                    webRTCClient.hangUp();
+                    ion.sound.stop("iphone"); 
+                    $('#menuScreenSharing').css({'display' : 'none'});
                     ion.sound.stop("skype");
                 });
                 $("#accept").click(function () {
