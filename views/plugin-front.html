@@ -173,7 +173,7 @@ box-shadow: 0 0 5px 5px #888;
 }
     </style>
        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-     <script src="//cloud.apizee.com/libs/jquery-1.9.0.min.js"></script>
+       <link rel="stylesheet" href="../css/font-awesome-animation.min.css">
       <script src="//cloud.apizee.com/apiRTC/apiRTC-latest.min.js"></script>
       <link rel="stylesheet" href="../css/bootstrap.css">
       <script src="../angular-1.5.x/angular.min.js"></script>
@@ -215,18 +215,18 @@ box-shadow: 0 0 5px 5px #888;
                 <div id="chat-plus">
                     <span id="contact"></span>
                     <div class="row thumbnail shadow-depth-4" id="chat-head" style="margin-bottom : 0px;">
-                        <button class="btn icon" href="#" style="background : #fafcfe;"><span class= "glyphicon glyphicon-earphone media-icon " id="audio-call"></span></button>        
-                        <button class="btn icon" id="video-call" style="background : #fafcfe;">
+                        <button class="btn icon" href="#" style="background : #fafcfe;" title="Appel audio"><span class= "glyphicon glyphicon-earphone media-icon " id="audio-call" ></span></button>        
+                        <button class="btn icon" id="video-call" style="background : #fafcfe;" title="Appel vidéo">
                             <span class="glyphicon glyphicon-facetime-video media-icon"></span>
                         </button> 
-                        <button class="btn icon" href="" id="screenSharing" style="background : #fafcfe;">
+                        <button class="btn icon" href="" id="screenSharing" style="background : #fafcfe;" title="Partage d'écran">
                          <span class="fa fa-desktop" aria-hidden="true"></span>
                         </button>
-                        <span class="col-xs-1"  id="chat-icon" style="display : none;">
+                        <span class="col-xs-1"  id="chat-icon" style="display : none;" >
                             <i class="fa fa-weixin" aria-hidden="true"   style="color : orange;"></i>
                         </span>
                         <div class="col-xs-1 pull-right">
-                            <a href="#" id="minus"><span class="glyphicon glyphicon-minus" ></span></a>
+                            <a href="#" id="minus" title="Réduire"><span class="glyphicon glyphicon-minus" ></span></a>
                         </div>
                     </div>
                     <div class="row"  id="chat-body" style="">
@@ -239,7 +239,11 @@ box-shadow: 0 0 5px 5px #888;
                                 <textarea class="form-control" rows="1" style="resize : none ;font-size : 12px;" placeholder="Tapez votre message ici"
                               id="text-input"></textarea>
                             </div>
+                            <div id="tipping-notif" style="visibility : hidden;">
+                                <i class="fa fa-circle-o faa-burst animated " style="background-color : white;"></i>
+                            </div>
                         </div>
+                          
                     </div>
                 </div>
             </div>
@@ -279,10 +283,12 @@ box-shadow: 0 0 5px 5px #888;
                 webRTCClient = null,
                 incomingCallId =0,
                 callerId =0,
-                callType = '';
+                callType = '',
+                destinationId =0;
             
             function startIM(destId){
                 $('#text-input').keyup( function(e){
+                    destinationId = destId;
                         if(e.keyCode ==13){
                             var message = $("#text-input").val();$('#text-input').val('');
                             sendIMMessage(destId, message);
@@ -293,7 +299,7 @@ box-shadow: 0 0 5px 5px #888;
              function sendIMMessage(destId, message){
                  if(message.trim() !=''){
                      imClient.sendMessage(destId, message);
-                     if( message!='null' && message != '$Ack_Accept'){
+                     if( message!='null' && message != '$Ack_Accept' && message != '//Writing\\_'){
                          $('#chat-messages').append('<li class="bubbledLeft">'+message+'</li>');
                          $('#chat-messages').append('<li class="textLeft" style="float : right; font-size : 10px; list-style : none; display : none;">'+
                                                 getHeure(new Date())+'</li>');
@@ -313,14 +319,21 @@ box-shadow: 0 0 5px 5px #888;
                         $('#call-going').css({'display' : 'none'});
                         $('#timer').timer();
                           
-                } else{
+                }
+                 else{
                      startIM(e.detail.senderId);
+                     if( e.detail.message == '//Writing\\_'){
+                         $('#tipping-notif').css({'visibility' : 'visible'});
+                     }
+                     else {
+                         $('#tipping-notif').css({'visibility' : 'hidden'});
                      $('#chat-messages').append('<li class="bubbledRight" >'+e.detail.message+'</li>'+                                    
                                             '<span class="textRight" style="float : left; font-size : 10px; list-style : none; display : none;">'+
                                             getHeure(e.detail.time)+'</span>'); 
                      ion.sound.play("facebook");
-                 $('#chat-icon').css({'display': 'block'});
+                    $('#chat-icon').css({'display': 'block'});
                      $('#chat-messages').animate({scrollTop: $('#chat-messages')[0].scrollHeight},2000); 
+             }
              }
              }
              
@@ -620,7 +633,10 @@ box-shadow: 0 0 5px 5px #888;
                  $('#chat-messages').mouseleave( function(){
                      $('.textLeft').hide('Scale');
                      $('.textRight').hide('Scale');
-                 })
+                 });
+                 $('#text-input').keypress( function(){
+                     sendIMMessage(destinationId, '//Writing\\_');
+                 });
              });
                </script>
 
